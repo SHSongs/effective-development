@@ -8,3 +8,5 @@
 
 ## scala
 [zio](/zio.md)
+
+[데이터 타입 구현](/implement)
