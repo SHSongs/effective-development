@@ -1,3 +1,4 @@
+import scala.::
 import scala.annotation.tailrec
 
 object SomList extends App {
@@ -5,16 +6,28 @@ object SomList extends App {
     def isEmpty = false
     def head: T
     def tail: LIST[T]
+    def a[B >: T](elem: B, tail: LIST[T]): LIST[B] =
+      {
+        tail match
+          case cons: CONS[_] =>
+            a(elem, tail.tail)
+          case nil: NIL[_] =>
+            CONS(elem, NIL())
+      }
   }
 
-  class CONS[T] (val head: T, val tail: LIST[T]) extends LIST[T]{
+  class CONS[T](val head: T, val tail: LIST[T]) extends LIST[T] {
     override def isEmpty: Boolean = false
+
+    override def toString: String = f"${head} :: ${tail}"
   }
 
   class NIL[T] extends LIST[T] {
     override def isEmpty = true
     override def head: T = throw new Error("Nil.head")
     override def tail: LIST[T] = throw new Error("Nil.tail")
+
+    override def toString: String = f"END"
   }
 
   def nth[T](list: LIST[T], n: Int): T = {
@@ -24,6 +37,98 @@ object SomList extends App {
       case cons if n == 0 => cons.head
       case cons => nth(cons.tail, n - 1)
   }
+
+  def append[T]( elem: T, l: LIST[T]): LIST[T] = l match
+    case x: SomList.CONS[_] => CONS(x.head, append(elem, x.tail))
+    case _: SomList.NIL[_] => CONS(elem, NIL())
+
+  def last[T](xs: LIST[T]): T = xs match
+    case nil: SomList.NIL[_] => throw new Error("last of empty list")
+    case cons: SomList.CONS[_] if cons.tail.isEmpty => cons.head
+    case cons: SomList.CONS[_] => last(cons.tail)
+
+  def init[T](xs: LIST[T]): LIST[T] = xs match
+    case _: SomList.NIL[_] => throw new Error("last of empty list")
+    case cons: SomList.CONS[_] if cons.tail.isEmpty => CONS(cons.head, NIL())
+    case cons: SomList.CONS[_] => CONS(cons.head, init(cons.tail))
+
+
+  def reverse[T](xs: LIST[T]): LIST[T] = xs match
+    case _: SomList.NIL[_] => NIL()
+    case cons: SomList.CONS[_] => append(cons.head, reverse(cons.tail))
+
+  def removeAt[T](at: Int, xs: LIST[T]): LIST[T] = xs match
+    case _: SomList.NIL[_] => NIL()
+    case cons: SomList.CONS[_] if at == 0 => cons.tail
+    case cons: SomList.CONS[_] => CONS(cons.head, removeAt(at - 1, cons.tail))
+
+  def combine[T](xs: LIST[T], ys: LIST[T]): LIST[T] = xs match
+    case _: SomList.NIL[_] => ys
+    case cons: SomList.CONS[_] => CONS(cons.head, combine(cons.tail, ys))
+
+  def flatten(xs: Any): LIST[Any] = xs match
+    case _: SomList.NIL[_] => NIL()
+    case cons: SomList.CONS[_] => combine(flatten(cons.head), flatten(cons.tail))
+    case _ => CONS(xs, NIL())
+
+
   val a = CONS("wasd", CONS("zxcv", CONS("ttt", NIL())))
   println(nth(a, 1) == "xzcv")
+
+  println("append")
+  val c = append("star", a)
+  println(c)
+
+  // find last
+  println("find last")
+  val d = last(c)
+  println(d)
+//    val err = last(NIL())
+
+  // init
+  println("init")
+  val f = init(a)
+  println(a)
+  println(f)
+
+  // reverse
+  println("reverse")
+  val g = reverse(c)
+  println(c)
+  println(g)
+
+  // removeAt
+  println("removeAt")
+  val h = removeAt(0, c)
+  println(c)
+  println(h)
+  val i = removeAt(2, c)
+  println(c)
+  println(i)
+  val j = removeAt(11, c)
+  println(c)
+  println(j)
+
+
+  // combine
+  println("combine")
+  println(a)
+  println(c)
+  println(combine(a, c))
+
+//   flatten
+  println("flatten")
+  val k = CONS("a", CONS("b", CONS("c", NIL())))
+  val l = CONS("d", CONS("e", NIL()))
+  val m = CONS(k, CONS(l, NIL()))
+  val n = flatten(m)
+  println(m)
+  println(n)
+
+  val o = init(m)
+  val p = init(m)
+  val q = CONS(m, CONS(o, CONS(p, NIL())))
+  val r = flatten(q)
+  println(q)
+  println(r)
 }
