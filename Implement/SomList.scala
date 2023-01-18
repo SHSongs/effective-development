@@ -1,3 +1,5 @@
+import SomTuple.SomTuple2
+
 import scala.::
 import scala.annotation.tailrec
 
@@ -30,6 +32,7 @@ object SomList extends App {
     override def toString: String = f"END"
   }
 
+  @tailrec
   def nth[T](list: LIST[T], n: Int): T = {
     println(list.head)
     list match
@@ -42,6 +45,7 @@ object SomList extends App {
     case x: SomList.CONS[_] => CONS(x.head, append(elem, x.tail))
     case _: SomList.NIL[_] => CONS(elem, NIL())
 
+  @tailrec
   def last[T](xs: LIST[T]): T = xs match
     case nil: SomList.NIL[_] => throw new Error("last of empty list")
     case cons: SomList.CONS[_] if cons.tail.isEmpty => cons.head
@@ -71,6 +75,25 @@ object SomList extends App {
     case cons: SomList.CONS[_] => combine(flatten(cons.head), flatten(cons.tail))
     case _ => CONS(xs, NIL())
 
+  def filter[T](xs: LIST[T], p: T => Boolean): LIST[T] = xs match
+    case _: SomList.NIL[_] =>
+      throw new Error("last of empty list")
+    case cons: SomList.CONS[_] if p(cons.head) && !cons.tail.isEmpty =>
+      CONS(cons.head, filter(cons.tail, p))
+    case cons: SomList.CONS[_] if p(cons.head) && cons.tail.isEmpty =>
+      CONS(cons.head, cons.tail)
+    case cons: SomList.CONS[_] if cons.tail.isEmpty =>
+      NIL()
+    case cons: SomList.CONS[_] =>
+      filter(cons.tail, p)
+
+  def span[T](xs: LIST[T], p: T => Boolean): SomTuple2[LIST[T], LIST[T]] =
+    val notP = (t: T) => !p(t)
+    SomTuple2(filter(xs, p), filter(xs, notP))
+
+  def pack[T](xs: LIST[T]): LIST[LIST[T]] = xs match
+    case _: SomList.NIL[_] => NIL()
+    case cons: SomList.CONS[_] => pack(cons.tail)
 
   val a = CONS("wasd", CONS("zxcv", CONS("ttt", NIL())))
   println(nth(a, 1) == "xzcv")
@@ -131,4 +154,20 @@ object SomList extends App {
   val r = flatten(q)
   println(q)
   println(r)
+
+  println("span")
+  val s = CONS(1, CONS(2, CONS(3, CONS(4, NIL()))))
+  val t = span(s, _ % 2 == 0)
+  println(t)
+
+  println("filter")
+  val u = filter(s, _ % 2 == 0)
+  println(u)
+
+  // pack List("a", "a", "b", "c") => List(List("a", 2), List("b", 1), List("c", 1))
+//  println("pack")
+//  val s = CONS("a", CONS("a", CONS("b", CONS("c", NIL()))))
+//  val t = pack(s)
+//  println(s)
+//  println(t)
 }
