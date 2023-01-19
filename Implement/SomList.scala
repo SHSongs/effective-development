@@ -4,7 +4,7 @@ import scala.::
 import scala.annotation.tailrec
 
 object SomList extends App {
-  trait LIST[T]{
+  sealed trait LIST[T]{
     def isEmpty = false
     def head: T
     def tail: LIST[T]
@@ -22,6 +22,10 @@ object SomList extends App {
     override def isEmpty: Boolean = false
 
     override def toString: String = f"${head} :: ${tail}"
+
+//    def apply[T](head: T, tail: LIST[T]): CONS[T] = new CONS(head, tail)
+
+//    def unapply[T](arg: CONS[T]): Option[(T, LIST[T])] = Some[(arg.head, arg. tail)]
   }
 
   class NIL[T] extends LIST[T] {
@@ -91,6 +95,19 @@ object SomList extends App {
     val notP = (t: T) => !p(t)
     SomTuple2(filter(xs, p), filter(xs, notP))
 
+  def filter2[T](xs: LIST[T], p: T => Boolean): LIST[T] = {
+
+    def run(remains: LIST[T], r: LIST[T]): LIST[T] = remains match
+      case _: SomList.NIL[_] => r
+      case cons: CONS[_] if p(cons.head) => run(cons.tail, CONS(cons.head, r))
+      case cons: CONS[_] => run(cons.tail, r)
+
+    run(xs, NIL())
+  }
+
+//  def span2[T](xs: LIST[T], p: T => Boolean): SomTuple2[LIST[T], LIST[T]] =
+
+
   def pack[T](xs: LIST[T]): LIST[LIST[T]] = xs match
     case _: SomList.NIL[_] => NIL()
     case cons: SomList.CONS[_] => pack(cons.tail)
@@ -156,13 +173,17 @@ object SomList extends App {
   println(r)
 
   println("span")
-  val s = CONS(1, CONS(2, CONS(3, CONS(4, NIL()))))
+  val s = CONS(6, CONS(5, CONS(1, CONS(2, CONS(3, CONS(4, NIL()))))))
   val t = span(s, _ % 2 == 0)
   println(t)
 
   println("filter")
   val u = filter(s, _ % 2 == 0)
   println(u)
+
+  println("filter2")
+  val u2 = filter2(s, _ % 2 == 0)
+  println(u2)
 
   // pack List("a", "a", "b", "c") => List(List("a", 2), List("b", 1), List("c", 1))
 //  println("pack")
