@@ -4,7 +4,7 @@
 
 ## 범용적인
 [sql](/sql.md)
-
+[linux](/linux.md)
 
 ## scala
 [zio](/zio.md)
