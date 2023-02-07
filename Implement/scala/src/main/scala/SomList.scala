@@ -1,46 +1,67 @@
+import LIST.*
+
 import scala.::
 import scala.annotation.tailrec
 
-object SomList extends App {
-  sealed trait LIST[T]{
-    def isEmpty = false
-    def head: T
-    def tail: LIST[T]
 
-    override def equals(obj: Any): Boolean =
-      @tailrec
-      def listEq(a: LIST[_], b: LIST[_]): Boolean =
-        if ((a.isEmpty && b.isEmpty) || a.head != b.head) {
-          a.isEmpty && b.isEmpty
-        }
-        else {
-          listEq(a.tail, b.tail)
-        }
+sealed trait LIST[T] {
+  def isEmpty = false
+  def head: T
+  def tail: LIST[T]
 
-      obj match {
-        case that: LIST[_] if isEmpty && that.isEmpty => true
-        case that: LIST[_] => listEq(this, that)
-        case _ => super.equals(o)
+  override def equals(obj: Any): Boolean =
+    @tailrec
+    def listEq(a: LIST[_], b: LIST[_]): Boolean =
+      if ((a.isEmpty && b.isEmpty) || a.head != b.head) {
+        a.isEmpty && b.isEmpty
+      }
+      else {
+        listEq(a.tail, b.tail)
       }
 
+    obj match {
+      case that: LIST[_] if isEmpty && that.isEmpty => true
+      case that: LIST[_] => listEq(this, that)
+      case _ => super.equals(obj)
+    }
+
+  def last: T = {
+    @tailrec
+    def run(xs: LIST[T]): T = xs match
+      case LIST(head, tail) if tail.isEmpty => head
+      case LIST(_, tail) => run(tail)
+      case _ => throw new Error("last of empty list")
+    run(this)
   }
+}
+
+object LIST {
+  def unapply[T](arg: LIST[T]): Option[(T, LIST[T])] = Some(arg.head, arg.tail)
 
   class CONS[T](val head: T, val tail: LIST[T]) extends LIST[T] {
     override def isEmpty: Boolean = false
+
     override def toString: String = f"${head} :: ${tail}"
   }
+
   object CONS {
     def apply[T](head: T, tail: LIST[T]): CONS[T] = new CONS(head, tail)
+
     def unapply[T](arg: CONS[T]): Option[(T, LIST[T])] = Some(arg.head, arg.tail)
   }
 
   class NIL[T] extends LIST[T] {
     override def isEmpty = true
+
     override def head: T = throw new Error("Nil.head")
+
     override def tail: LIST[T] = throw new Error("Nil.tail")
 
     override def toString: String = f"END"
   }
+}
+
+object SomList extends App {
 
   @tailrec
   def nth[T](list: LIST[T], n: Int): T = {
@@ -53,52 +74,47 @@ object SomList extends App {
 
   def append[T](elem: T, l: LIST[T]): LIST[T] = {
     def run(elem: T, remains: LIST[T], acc: LIST[T]): LIST[T] = remains match
-      case x: SomList.CONS[_] => append(elem, x.tail)
-      case _: SomList.NIL[_] => CONS(elem, NIL())
+      case x: CONS[_] => append(elem, x.tail)
+      case _: NIL[_] => CONS(elem, NIL())
 
     run(elem, l, NIL())
   }
 
-  @tailrec
-  def last[T](xs: LIST[T]): T = xs match
-    case nil: SomList.NIL[_] => throw new Error("last of empty list")
-    case CONS(head, tail) => head
-    case cons: SomList.CONS[_] => last(cons.tail)
 
   def init[T](xs: LIST[T]): LIST[T] = xs match
-    case _: SomList.NIL[_] => throw new Error("last of empty list")
-    case cons: SomList.CONS[_] if cons.tail.isEmpty => CONS(cons.head, NIL())
-    case cons: SomList.CONS[_] => CONS(cons.head, init(cons.tail))
+    case _: NIL[_] => throw new Error("last of empty list")
+    case cons: CONS[_] if cons.tail.isEmpty => CONS(cons.head, NIL())
+    case cons: CONS[_] => CONS(cons.head, init(cons.tail))
 
   val tasr = List(1, 3).reverse
   def reverse[T](xs: LIST[T]): LIST[T] = xs match
-    case _: SomList.NIL[_] => NIL()
-    case cons: SomList.CONS[_] => append(cons.head, reverse(cons.tail))
+    case _: NIL[_] => NIL()
+    case cons: CONS[_] => append(cons.head, reverse(cons.tail))
 
   def removeAt[T](at: Int, xs: LIST[T]): LIST[T] = xs match
-    case _: SomList.NIL[_] => NIL()
-    case cons: SomList.CONS[_] if at == 0 => cons.tail
-    case cons: SomList.CONS[_] => CONS(cons.head, removeAt(at - 1, cons.tail))
+    case _: NIL[_] => NIL()
+    case cons: CONS[_] if at == 0 => cons.tail
+    case cons: CONS[_] => CONS(cons.head, removeAt(at - 1, cons.tail))
 
   def combine[T](xs: LIST[T], ys: LIST[T]): LIST[T] = xs match
-    case _: SomList.NIL[_] => ys
-    case cons: SomList.CONS[_] => CONS(cons.head, combine(cons.tail, ys))
+    case _: NIL[_] => ys
+    case cons: CONS[_] => CONS(cons.head, combine(cons.tail, ys))
 
   def flatten(xs: Any): LIST[Any] = xs match
-    case _: SomList.NIL[_] => NIL()
-    case cons: SomList.CONS[_] => combine(flatten(cons.head), flatten(cons.tail))
+    case _: NIL[_] => NIL()
+    case cons: CONS[_] => combine(flatten(cons.head), flatten(cons.tail))
     case _ => CONS(xs, NIL())
 
   def filter[T](xs: LIST[T], p: T => Boolean): LIST[T] = xs match
-    case _: SomList.NIL[_] =>
+    case _: NIL[_] =>
       throw new Error("last of empty list")
-    case cons: SomList.CONS[_] if p(cons.head) && !cons.tail.isEmpty =>
+    case cons: CONS[_] if p(cons.head) && !cons.tail.isEmpty =>
       CONS(cons.head, filter(cons.tail, p))
-    case cons: SomList.CONS[_] if p(cons.head) && cons.tail.isEmpty =>
+    case cons: CONS[_] if p(cons.head) && cons.tail.isEmpty =>
       CONS(cons.head, cons.tail)
-    case cons: SomList.CONS[_] if cons.tail.isEmpty =>
+    case cons: CONS[_] if cons.tail.isEmpty =>
       NIL()
-    case cons: SomList.CONS[_] =>
+    case cons: CONS[_] =>
       filter(cons.tail, p)
 
   def span[T](xs: LIST[T], p: T => Boolean): SomTuple2[LIST[T], LIST[T]] =
@@ -108,7 +124,7 @@ object SomList extends App {
   def filter2[T](xs: LIST[T], p: T => Boolean): LIST[T] = {
 
     def run(remains: LIST[T], acc: LIST[T]): LIST[T] = remains match
-      case _: SomList.NIL[_] => acc
+      case _: NIL[_] => acc
       case cons: CONS[_] if p(cons.head) => run(cons.tail, append(cons.head, acc))
       case cons: CONS[_] => run(cons.tail, acc)
 
@@ -119,8 +135,8 @@ object SomList extends App {
 
 
   def pack[T](xs: LIST[T]): LIST[LIST[T]] = xs match
-    case _: SomList.NIL[_] => NIL()
-    case cons: SomList.CONS[_] => pack(cons.tail)
+    case _: NIL[_] => NIL()
+    case cons: CONS[_] => pack(cons.tail)
 
   val a = CONS("wasd", CONS("zxcv", CONS("ttt", NIL())))
   println(nth(a, 1) == "xzcv")
@@ -128,12 +144,6 @@ object SomList extends App {
   println("append")
   val c = append("star", a)
   println(c)
-
-  // find last
-  println("find last")
-  val d = last(c)
-  println(d)
-//    val err = last(NIL())
 
   // init
   println("init")
