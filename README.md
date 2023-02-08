@@ -8,5 +8,6 @@
 - [데이터 타입 구현](/implement)
 
 ## scala
+- [scala](/scala.md)
 - [zio](/zio.md)
 
