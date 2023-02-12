@@ -33,6 +33,17 @@ sealed trait LIST[T] {
       case _ => throw new Error("last of empty list")
     run(this)
   }
+
+  def length: Int = {
+    @tailrec
+    def run(xs: LIST[T], len: Int): Int = xs match
+      case NIL(_): NIL[_] => len
+      case LIST(_, tail) if tail.isEmpty =>
+        len + 1
+      case LIST(_, tail) =>
+        run(tail, len + 1)
+    run(this, 0)
+  }
 }
 
 object LIST {
@@ -58,6 +69,9 @@ object LIST {
     override def tail: LIST[T] = throw new Error("Nil.tail")
 
     override def toString: String = f"END"
+  }
+  object NIL{
+    def unapply[T](arg: NIL[T]): Option[T] = None
   }
 }
 

@@ -12,3 +12,8 @@ class TreeSpec extends AnyFunSuite:
     assert(SomTree.find(40, sampleIntTree) == Some(IntNode(40)))
   }
 
+  test("count age > 25"){
+    val res = SomList.filter(User.makeUsers, _.age > 25)
+    assert(res.length == 2)
+  }
+

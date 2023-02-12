@@ -23,4 +23,10 @@ class LISTSpec extends AnyFunSuite {
   test("last") {
     assert(sample.last == "c")
   }
+  test("length 0") {  //fixme: fail test
+    assert(NIL().length == 0)  
+  }
+  test("length") {
+    assert(sample.length == 3)
+  }
 }
