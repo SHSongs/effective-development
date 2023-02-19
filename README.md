@@ -12,4 +12,4 @@
 - [zio](/zio.md)
 
 ## etc
-- python[/python.md]
+- [python](/python.md)
