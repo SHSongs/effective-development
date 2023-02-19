@@ -11,3 +11,5 @@
 - [scala](/scala.md)
 - [zio](/zio.md)
 
+## etc
+- python[/python.md]
