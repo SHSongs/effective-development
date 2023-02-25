@@ -5,10 +5,12 @@ final case class IntNode(t: Int, l: Option[IntNode] = None, r: Option[IntNode] =
   override def compare(that: Int): Int = t.compare(that)
 }
 
-final case class IV[T <: String](i: Int, t:T)
+final case class IV[T](i: Int, t:T)
 
-final case class IndexNode[T <: String](iv: IV[T], l: Option[IndexNode[T]] = None, r: Option[IndexNode[T]] = None) extends Node[T] {
-  override def compare(that: T): Int = iv.t.compareTo(that)
+final case class IndexNode[T : Ordering](iv: IV[T], l: Option[IndexNode[T]] = None, r: Option[IndexNode[T]] = None)(implicit Ord: Ordering[T]) extends Node[T] {
+//  (implicit Ord: Ordering[T])
+  override def compare(that: T): Int =
+    Ord.compare(iv.t, that)
 }
 //case object IntNode extends Node[Int]
 object SomTree {
@@ -24,12 +26,12 @@ object SomTree {
     run(Some(root))
   }
 
-  def find[T <: String](target: T, root: IndexNode[T]): Option[IndexNode[T]] = {
+  def find[T : Ordering](target: T, root: IndexNode[T])(implicit Ord: Ordering[T]): Option[IndexNode[T]] = {
     def run(node: Option[IndexNode[T]]): Option[IndexNode[T]] =
       node match
-        case Some(n) if n.iv.t == target => node
-        case Some(n) if n.iv.t > target => run(n.l)
-        case Some(n) if n.iv.t < target => run(n.r)
+        case Some(n) if Ord.equiv(n.iv.t, target) => node
+        case Some(n) if Ord.gt(n.iv.t, target) => run(n.l)
+        case Some(n) if Ord.gt(target, n.iv.t) => run(n.r)
         case None => None
 
     run(Some(root))

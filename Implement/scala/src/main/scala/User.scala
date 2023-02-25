@@ -2,9 +2,11 @@ import LIST._
 
 import java.util.UUID
 
-case class User(id: UUID, name: String, age: Int)
+case class User(id: UUID = UUID.randomUUID(), name: String, age: Int)
 
 object User {
+  implicit val Ord: Ordering[User] = Ordering.by(_.name)
+  
   val makeUsers = CONS(
     User(UUID.randomUUID(), "abc", 20),
     (CONS(
@@ -14,5 +16,4 @@ object User {
         NIL())
     ))
   )
-
 }
