@@ -5,7 +5,7 @@
 ## 범용적인
 - [sql](/sql.md)
 - [linux](/linux.md)
-- [데이터 타입 구현](/implement)
+- [데이터 타입 구현](/Implement/scala/src/test/scala)
 
 ## scala
 - [scala](/scala.md)
