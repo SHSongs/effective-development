@@ -35,3 +35,13 @@ List(head, tail)을 이용해 head는 T, tail은 head를 제외한 나머지 LIS
 ```
 `LIST[T] => Option[(T, LIST[T]` 로 흐르는 함수이다. return type이 Option인 이유는 조건에 따라 매칭이 안되게 할 수 있기 때문이다. 예를들면 tail이 비어있다면(isEmpty) None을 반환하게 해 매칭이 성립 안하게 할 수 있다.
 
+<br>
+<br>
+
+## 에러처리
+
+극단적인 예시
+```scala
+import scala.util.Try
+val v = Try(1/0).getOrElse(0)
+```
