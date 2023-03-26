@@ -6,6 +6,7 @@
 - [sql](/sql.md)
 - [linux](/linux.md)
 - [데이터 타입 구현](/Implement/scala/src/test/scala)
+- [vi](/vi.md)
 
 ## scala
 - [scala](/scala.md)
